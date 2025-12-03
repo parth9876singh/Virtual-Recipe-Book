@@ -7,11 +7,14 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 app.use(cors())
 
 
+const userRoutes = require('./routes/user.route.js')
 
-
+app.use('/user',userRoutes)
 
 
 
