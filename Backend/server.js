@@ -13,8 +13,10 @@ app.use(cors())
 
 
 const userRoutes = require('./routes/user.route.js')
+const googleAuthRoutes = require("./routes/googleAuth.route");
 
 app.use('/user',userRoutes)
+app.use("/auth", googleAuthRoutes);
 
 
 
