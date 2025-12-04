@@ -14,9 +14,11 @@ app.use(cors())
 
 const userRoutes = require('./routes/user.route.js')
 const googleAuthRoutes = require("./routes/googleAuth.route");
-
+const recipeRoutes  =require('./routes/recipe.route.js')
 app.use('/user',userRoutes)
-app.use("/auth", googleAuthRoutes);
+app.use("/auth", googleAuthRoutes)
+app.use('/recipe',recipeRoutes)
+app.use("/upload", require("./routes/upload.route"));
 
 
 
