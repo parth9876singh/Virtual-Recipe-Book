@@ -4,21 +4,22 @@ const mongoose = require("mongoose");
 
 module.exports.createRecipe = async (req, res) => {
     try {
-        const { 
-            title, 
-            description, 
-            ingredients, 
-            steps, 
-            cuisine, 
-            difficulty, 
+        const {
+            title,
+            description,
+            ingredients,
+            steps,
+            cuisine,
+            difficulty,
             cookingTime,
+            menu, // <--- Extract menu
             videoUrl   // <-- if user gives manual URL
         } = req.body;
 
         // Check if files were uploaded
         if (!req.files) {
-            return res.status(400).json({ 
-                message: "No files uploaded. Please use form-data and upload a thumbnail image." 
+            return res.status(400).json({
+                message: "No files uploaded. Please use form-data and upload a thumbnail image."
             });
         }
 
@@ -26,8 +27,8 @@ module.exports.createRecipe = async (req, res) => {
         const videoFile = req.files.recipeVideo?.[0];
 
         if (!thumbnailFile) {
-            return res.status(400).json({ 
-                message: "Thumbnail is required. Please upload an image file with field name 'thumbnail'." 
+            return res.status(400).json({
+                message: "Thumbnail is required. Please upload an image file with field name 'thumbnail'."
             });
         }
 
@@ -98,6 +99,7 @@ module.exports.createRecipe = async (req, res) => {
             cuisine,
             difficulty,
             cookingTime: cookingTimeNum,
+            menu, // <--- Added menu field
             createdBy: req.user._id
         });
 
@@ -108,9 +110,9 @@ module.exports.createRecipe = async (req, res) => {
 
     } catch (err) {
         console.error("Error creating recipe:", err);
-        res.status(500).json({ 
-            message: "Error creating recipe", 
-            error: err.message || "Internal server error" 
+        res.status(500).json({
+            message: "Error creating recipe",
+            error: err.message || "Internal server error"
         });
     }
 };
@@ -246,3 +248,22 @@ module.exports.addComment = async (req, res) => {
         res.status(500).json({ error: err });
     }
 };
+
+module.exports.getMyRecipes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const myRecipes = await Recipe.find({ createdBy: userId })
+      .sort({ createdAt: -1 }); // latest first
+
+    res.status(200).json({
+      message: "My recipes fetched successfully",
+      count: myRecipes.length,
+      recipes: myRecipes
+    });
+  } catch (error) {
+    console.error("Error fetching my recipes:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+

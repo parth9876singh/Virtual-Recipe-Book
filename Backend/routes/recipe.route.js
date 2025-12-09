@@ -32,7 +32,8 @@ router.post(
   recipeController.createRecipe
 );
 
-router.get("/all-recipe", recipeController.getAllRecipes);
+router.get("/my-recipes", authUser, recipeController.getMyRecipes);
+router.get("/all", recipeController.getAllRecipes);
 
 // Parameterized routes come last
 router.get("/:id", recipeController.getRecipeById);

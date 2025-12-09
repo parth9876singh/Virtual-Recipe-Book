@@ -19,6 +19,12 @@ const recipeSchema = new mongoose.Schema(
     difficulty: String,
     cookingTime: Number,
 
+    menu: {
+      type: String,
+      enum: ["Breakfast", "Lunch", "Dinner", "Dessert", "Health", "Quick Meal"],
+      required: true,
+    },
+
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 
     comments: [
