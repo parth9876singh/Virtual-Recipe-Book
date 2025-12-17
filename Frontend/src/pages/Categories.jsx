@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Clock, Users, ChefHat, X, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../lib/axios";
+import Navbar from "../components/Navbar";
 
 // Inline UI Components to replace @/components/ui
 const Button = ({
@@ -156,16 +157,13 @@ const Categories = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background mt-20">
+      <Navbar />
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
+
             <div>
               <h1 className="text-2xl font-bold text-foreground">Categories</h1>
               <p className="text-sm text-muted-foreground">

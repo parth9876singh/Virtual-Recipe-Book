@@ -21,7 +21,9 @@ const recipeRoutes = require('./routes/recipe.route.js')
 app.use('/user', userRoutes)
 app.use("/auth", googleAuthRoutes)
 app.use('/recipe', recipeRoutes)
+app.use('/recipe', recipeRoutes)
 app.use("/upload", require("./routes/upload.route"));
+app.use("/ai", require("./routes/ai.route"));
 
 
 

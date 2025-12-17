@@ -33,12 +33,16 @@ router.post(
 );
 
 router.get("/my-recipes", authUser, recipeController.getMyRecipes);
+router.get("/saved-recipes", authUser, recipeController.getSavedRecipes); // Moved up
 router.get("/all", recipeController.getAllRecipes);
 
 // Parameterized routes come last
 router.get("/:id", recipeController.getRecipeById);
 router.put("/update/:id", authUser, recipeController.updateRecipe);
 router.delete("/delete/:id", authUser, recipeController.deleteRecipe);
+
+router.post("/:id/save", authUser, recipeController.toggleSave);
+router.post("/:id/share", authUser, recipeController.shareRecipe); // New share route
 
 // Extra routes with parameters
 router.post("/:id/like", authUser, recipeController.toggleLike);

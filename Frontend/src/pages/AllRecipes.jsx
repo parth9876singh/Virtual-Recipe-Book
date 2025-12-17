@@ -17,6 +17,7 @@ import {
   LayoutList,
   Loader2
 } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 /* ---------------- FILTER OPTIONS ---------------- */
 const cuisines = ["All", "Indian", "Italian", "Japanese", "Mexican", "Thai", "French", "Chinese"];
@@ -98,16 +99,12 @@ export default function AllRecipes() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-20">
+      <Navbar />
       {/* ---- Header ---- */}
       <header className="sticky top-0 backdrop-blur-xl bg-background/80 border-b border-border/50 z-20">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Link to="/">
-            <button className="p-2 rounded-xl hover:bg-muted/30">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          </Link>
+
 
           <div className="flex-1">
             <h1 className="text-2xl font-display font-bold">Recipe Explorer</h1>

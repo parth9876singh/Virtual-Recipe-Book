@@ -1,4 +1,5 @@
 import { BookOpen, Heart, Share2, Clock, ChefHat, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -41,32 +42,56 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section id="recipes" className="py-20 md:py-32 bg-background border-t border-border">
+    <section id="recipes" className="py-20 md:py-32 bg-background relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
       <div className="container mx-auto px-4">
 
         {/* Header */}
-        <div className="text-center mb-12 md:mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">
+        <div className="text-center mb-12 md:mb-16">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4 border border-primary/20 backdrop-blur-sm"
+          >
             Why RecipeVault?
-          </span>
+          </motion.span>
 
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4"
+          >
             Everything You Need to<br />
             <span className="text-primary">Cook with Confidence</span>
-          </h2>
+          </motion.h2>
 
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-muted-foreground max-w-2xl mx-auto"
+          >
             From discovering new dishes to organizing your kitchen, we've got you covered
-          </p>
+          </motion.p>
         </div>
 
         {/* Feature Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={feature.title}
-              className="group rounded-2xl p-8 border border-border bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-in fade-in zoom-in duration-500 fill-mode-both"
-              style={{ animationDelay: `${index * 100}ms` }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="group rounded-2xl p-8 border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
             >
               <div
                 className={`w-14 h-14 rounded-xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
@@ -74,14 +99,14 @@ const FeaturesSection = () => {
                 <feature.icon className="w-7 h-7" />
               </div>
 
-              <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors">
                 {feature.title}
               </h3>
 
               <p className="text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
 

@@ -10,7 +10,7 @@ import AllRecipes from './pages/AllRecipes'
 import RecipeDetail from './pages/RecipeDetail'
 import { AuthProvider } from './context/AuthContext'
 import Categories from './pages/Categories'
-
+import AIRecipeMaker from './pages/AIRecipeMaker'
 const App = () => {
   return (
     <div className="font-sans transition-colors duration-300">
@@ -25,7 +25,9 @@ const App = () => {
           <Route path="/recipes" element={<AllRecipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/categories" element={<Categories />} />
-          
+          <Route path="/ai-chef" element={<AIRecipeMaker />} />
+
+
         </Routes>
         <Toaster position="top-center" reverseOrder={false} />
       </AuthProvider>

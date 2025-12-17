@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles, Clock, Users } from "lucide-react";
+import { Search, Sparkles, Clock, Users, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 import video1 from "../assets/video1.mp4";
 import video2 from "../assets/video2.mp4";
@@ -17,136 +18,156 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-background text-foreground">
-      {/* Background Elements */}
+      {/* Background Gradients */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl opacity-50 animate-pulse" />
-        <div
-          className="absolute bottom-20 left-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl opacity-50 animate-pulse"
-          style={{ animationDelay: "2s" }}
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-20 right-10 w-96 h-96 bg-primary/20 rounded-full blur-[100px] opacity-60"
         />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], x: [0, -50, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-20 left-10 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] opacity-60"
+        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
       </div>
 
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
           {/* Left Content */}
-          <div className="text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium font-sans text-sm mb-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
+          <div className="text-center lg:text-left z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium font-sans text-sm mb-6 border border-primary/20 backdrop-blur-sm"
+            >
               <Sparkles className="w-4 h-4" />
               <span>Your Personal Digital Cookbook</span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
+            >
               Discover &<br />
-              <span className="text-primary">Save Recipes</span><br />
-              You ll Love
-            </h1>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Save Recipes</span><br />
+              You'll Love
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground font-sans max-w-xl mx-auto lg:mx-0 mb-8 animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-lg md:text-xl text-muted-foreground font-sans max-w-xl mx-auto lg:mx-0 mb-8"
+            >
               Your culinary journey starts here. Explore thousands of recipes, save your favorites, and create your personal cookbook.
-            </p>
+            </motion.p>
 
-            {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto lg:mx-0 mb-10 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
+            {/* Search Bar - Glassy Effect */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto lg:mx-0 mb-10 p-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl"
+            >
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search for recipes..."
-                  className="w-full h-14 pl-12 pr-4 rounded-xl border border-input bg-card/80 backdrop-blur-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  className="w-full h-12 pl-12 pr-4 rounded-xl bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
                 />
               </div>
 
               <button
-                onClick={() => navigate("/signup")}
-                className="h-14 px-8 bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:opacity-90 hover:shadow-primary/40 transition-all rounded-xl transform hover:-translate-y-0.5"
+                onClick={() => navigate("/recipes")}
+                className="h-12 px-8 bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg hover:bg-primary/90 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
               >
-                Explore
+                Explore <ArrowRight className="w-4 h-4" />
               </button>
-            </div>
+            </motion.div>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8 animate-in fade-in slide-in-from-bottom-7 duration-700 delay-400">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-wrap justify-center lg:justify-start gap-8"
+            >
               {stats.map((stat, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <stat.icon className="w-5 h-5 text-primary" />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                    <stat.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-display text-2xl font-bold text-foreground">
+                    <p className="font-display text-xl font-bold text-foreground">
                       {stat.value}
                     </p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           {/* Right Video Grid */}
-          <div className="relative hidden lg:block animate-in fade-in zoom-in duration-1000 delay-200">
+          <div className="relative hidden lg:block">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-2xl overflow-hidden shadow-xl h-48 border border-border">
-                  <video
-                    src={video1}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
+              <motion.div
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="space-y-4 pt-12"
+              >
+                <div className="rounded-3xl overflow-hidden shadow-2xl h-56 border-4 border-white/10 rotate-[-3deg] hover:rotate-0 transition-transform duration-500 group">
+                  <video src={video1} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" autoPlay muted loop playsInline />
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-xl h-64 border border-border">
-                  <video
-                    src={video2}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
+                <div className="rounded-3xl overflow-hidden shadow-2xl h-64 border-4 border-white/10 rotate-[2deg] hover:rotate-0 transition-transform duration-500 group">
+                  <video src={video2} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" autoPlay muted loop playsInline />
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="space-y-4 pt-8">
-                <div className="rounded-2xl overflow-hidden shadow-xl h-64 border border-border">
-                  <video
-                    src={video3}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
+              <motion.div
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="space-y-4"
+              >
+                <div className="rounded-3xl overflow-hidden shadow-2xl h-64 border-4 border-white/10 rotate-[3deg] hover:rotate-0 transition-transform duration-500 group">
+                  <video src={video3} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" autoPlay muted loop playsInline />
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-xl h-48 border border-border">
-                  <video
-                    src={video4}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
+                <div className="rounded-3xl overflow-hidden shadow-2xl h-56 border-4 border-white/10 rotate-[-2deg] hover:rotate-0 transition-transform duration-500 group">
+                  <video src={video4} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" autoPlay muted loop playsInline />
                 </div>
-              </div>
+              </motion.div>
             </div>
 
-            {/* Floating Badge */}
-            <div className="absolute -left-8 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-md border border-border rounded-2xl p-4 shadow-xl animate-bounce duration-[3000ms]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-                  <span className="text-lg">👨‍🍳</span>
-                </div>
-
-                <div>
-                  <p className="font-semibold text-foreground">Chef's Choice</p>
-                  <p className="text-sm text-muted-foreground">New recipes daily</p>
-                </div>
+            {/* Floating Glass Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, x: -50 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 1, type: "spring" }}
+              className="absolute top-1/2 -left-12 -translate-y-1/2 p-4 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-xl shadow-2xl z-20 flex items-center gap-4 animate-float"
+            >
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-orange-500 flex items-center justify-center text-2xl shadow-lg">
+                👨‍🍳
               </div>
-            </div>
+              <div>
+                <p className="font-bold text-foreground">Chef's Choice</p>
+                <div className="flex text-amber-500 text-xs">★★★★★</div>
+              </div>
+            </motion.div>
 
           </div>
         </div>

@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Heart, Bookmark, Clock, Users, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Bookmark, Heart, MoreVertical, Pencil, Share2, Trash2 } from "lucide-react"; // Import Share2
 
-export function RecipeCard({ recipe, onLike, onSave, onEdit, onDelete }) {
+export function RecipeCard({ recipe, onLike, onSave, onEdit, onDelete, onShare, onClick }) { // Added onShare, onClick
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden shadow-md bg-card border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+    <div
+      onClick={onClick} // Make entire card clickable
+      className="group relative rounded-3xl overflow-hidden shadow-md bg-card border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+    >
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={recipe.image}
@@ -23,15 +26,29 @@ export function RecipeCard({ recipe, onLike, onSave, onEdit, onDelete }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="absolute top-4 right-4 flex gap-2">
+        <div className="absolute top-4 right-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
+          {/* Share Button (Only for owned & private recipes) */}
+          {recipe.isOwned && !recipe.isPublic && (
+            <button
+              onClick={onShare}
+              title="Share as Public"
+              className="p-2 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 text-white transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Save */}
           <button
             onClick={onSave}
+            title={recipe.isSaved ? "Unsave" : "Save"}
             className={`p-2 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/40 transition-colors ${recipe.isSaved ? "text-primary" : "text-white"
               }`}
           >
             <Bookmark className={`w-4 h-4 ${recipe.isSaved ? "fill-current" : ""}`} />
           </button>
+
+          {/* ... existing Like and Menu buttons ... */}
 
           {/* Like */}
           <button

@@ -15,8 +15,11 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-muted py-16 md:py-20 border-t border-border">
-      <div className="container mx-auto px-4">
+    <footer className="bg-background py-16 md:py-20 border-t border-border/50 relative overflow-hidden">
+      {/* Subtle background glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 relative z-10">
 
         {/* Top Section */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 md:gap-12 mb-12">
@@ -70,7 +73,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} RecipeVault. All rights reserved.
           </p>

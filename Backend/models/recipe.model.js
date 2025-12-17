@@ -12,6 +12,11 @@ const recipeSchema = new mongoose.Schema(
       default: "url",
     },
 
+    isPublic: {
+      type: Boolean,
+      default: true, // Default true for manual creation, but we'll override for AI
+    },
+
     ingredients: [{ name: String, quantity: String }],
     steps: [{ stepNumber: Number, instruction: String }],
 

@@ -1,80 +1,87 @@
 import { Plus, Search, Filter, BookOpen, Heart, Bookmark, Home, HomeIcon } from "lucide-react";
 import { StatsCard } from "./StatsCard";
 import { RecipeCard } from "./RecipeCard";
+import { RecipeModal } from "./RecipeModal"; // Import Modal
 import { useState, useEffect } from "react";
 import api from "../../lib/axios";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast"; // Import toast
 
 export function DashboardContent({ user }) {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("My Recipes");
+    const [selectedRecipe, setSelectedRecipe] = useState(null); // Modal State
     const [stats, setStats] = useState([
         { label: "My Recipes", value: "0", icon: BookOpen, color: "bg-orange-500", textColor: "text-white" },
         { label: "Saved Recipes", value: "0", icon: Bookmark, color: "bg-background", itemColor: "text-muted-foreground" },
         { label: "Liked Recipes", value: "0", icon: Heart, color: "bg-pink-500", textColor: "text-white" },
     ]);
 
-    // Initial Fetch for Stats (Background)
+    // Helper to refresh data
+    const fetchTabRecipes = async () => {
+        setLoading(true);
+        try {
+            if (activeTab === "My Recipes") {
+                const res = await api.get("/recipe/my-recipes");
+                setRecipes(res.data.recipes);
+            } else if (activeTab === "Saved") {
+                const res = await api.get("/recipe/saved-recipes");
+                // Backend returns { message, count, recipes: [...] }
+                setRecipes(res.data.recipes);
+            } else if (activeTab === "Liked") {
+                const res = await api.get("/recipe/all");
+                setRecipes(res.data);
+            }
+        } catch (error) {
+            console.error("Error fetching tab recipes:", error);
+            setRecipes([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Initial Stats Fetch
     useEffect(() => {
         const fetchStatsData = async () => {
             try {
-                // We still need all recipes to calculate the 'Liked' stats if we don't have a dedicated endpoint
-                const res = await api.get("/recipe/all");
-                const allRecipes = res.data;
+                // Get all relevant data parallelly or simpler
+                // Get My Recipes Count
+                const myRes = await api.get("/recipe/my-recipes");
+                const myCount = myRes.data.count;
 
-                const myCount = allRecipes.filter(r => (r.createdBy?._id || r.createdBy) === user?._id).length;
-                const likedCount = allRecipes.filter(r => r.likes?.includes(user?._id)).length;
+                // Get Saved Recipes Count
+                const savedRes = await api.get("/recipe/saved-recipes");
+                const savedCount = savedRes.data.count;
 
-                setStats([
-                    { label: "My Recipes", value: myCount.toString(), icon: BookOpen, color: "bg-orange-500", textColor: "text-white" },
-                    { label: "Saved Recipes", value: "0", icon: Bookmark, color: "bg-background", itemColor: "text-muted-foreground" },
-                    { label: "Liked Recipes", value: likedCount.toString(), icon: Heart, color: "bg-pink-500", textColor: "text-white" },
+                // Get Liked (client side filter from all public for now, or assume 0 if expensive)
+                // Keeping simple to avoid too many calls, just use what we have or user info if we stored it
+                // Let's rely on array filtering if we are in that tab, but initial load:
+                setStats(prev => [
+                    { ...prev[0], value: myCount.toString() },
+                    { ...prev[1], value: savedCount.toString() },
+                    { ...prev[2], value: "-" } // Placeholder
                 ]);
 
-            } catch (error) {
-                console.error("Error fetching stats:", error);
+            } catch (e) {
+                console.error("Stats fetch error", e);
             }
         };
+        if (user?._id) fetchStatsData();
+    }, [user?._id, activeTab]); // Refresh stats on tab change too roughly
 
-        if (user?._id) {
-            fetchStatsData();
-        }
-    }, [user?._id]);
-
-    // Handle Tab Changes
     useEffect(() => {
-        const fetchTabRecipes = async () => {
-            setLoading(true);
-            try {
-                if (activeTab === "My Recipes") {
-                    const res = await api.get("/recipe/my-recipes");
-                    // Controller returns { message, count, recipes: [...] }
-                    setRecipes(res.data.recipes);
-                } else if (activeTab === "Liked") {
-                    // For "Liked", we fetch all and filter client-side
-                    const res = await api.get("/recipe/all");
-                    setRecipes(res.data);
-                }
-            } catch (error) {
-                console.error("Error fetching tab recipes:", error);
-                setRecipes([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTabRecipes();
     }, [activeTab]);
 
 
-    // Filter Recipes based on Tab
+    // Filter Recipes logic
     const getFilteredRecipes = () => {
         switch (activeTab) {
             case "My Recipes":
                 return recipes;
             case "Saved":
-                return [];
+                return recipes; // Already fetched specific list
             case "Liked":
                 return recipes.filter(r => r.likes?.includes(user?._id));
             default:
@@ -84,19 +91,79 @@ export function DashboardContent({ user }) {
 
     const filteredRecipes = getFilteredRecipes();
 
+    // Handlers
+    const handleShare = async (recipeId) => {
+        try {
+            const loadingToast = toast.loading("Sharing recipe...");
+            await api.post(`/recipe/${recipeId}/share`);
+            toast.dismiss(loadingToast);
+            toast.success("Recipe is now Public!");
+            fetchTabRecipes(); // Refresh list to show change
+        } catch (error) {
+            toast.dismiss();
+            toast.error("Failed to share.");
+        }
+    };
+
+    const handleSave = async (recipeId) => {
+        try {
+            await api.post(`/recipe/${recipeId}/save`);
+            toast.success("Saved status updated");
+            fetchTabRecipes(); // Refresh (important if in Saved tab to remove it)
+        } catch (error) {
+            toast.error("Failed to update save.");
+        }
+    };
+
+    const handleLike = async (recipeId) => {
+        try {
+            await api.post(`/recipe/${recipeId}/like`);
+            // Optimistic update or refresh? Refresh for now
+            const updatedRecipes = recipes.map(r => {
+                if (r._id === recipeId) {
+                    const isLiked = r.likes.includes(user._id);
+                    const newLikes = isLiked ? r.likes.filter(id => id !== user._id) : [...r.likes, user._id];
+                    return { ...r, likes: newLikes };
+                }
+                return r;
+            });
+            setRecipes(updatedRecipes);
+        } catch (error) {
+            console.error("Like error", error);
+        }
+    };
+
+
     const recipesData = filteredRecipes.map(r => ({
+        ...r, // Keep original data for modal
         _id: r._id,
         name: r.title,
         category: r.cuisine || "General",
         image: r.thumbnail,
-        saved: false,
-        liked: r.likes?.includes(user?._id) || false,
+        saved: user?.savedRecipes?.includes(r._id) || activeTab === "Saved", // Logic can be complex if user obj isn't live updated. 
+        // Better: check if ID is in the fetched 'saved' list? 
+        // Simplified: For now we assume false unless we are IN Saved tab, OR we need checks.
+        // Let's pass 'isSaved' if the backend returned it? No.
+        // Assume 'saved' button just calls toggle, visually we might not know unless we fetch user again.
+        // Actually, let's map it based on `activeTab === "Saved"` for the saved icon style.
+        isSaved: activeTab === "Saved", // Temporary simplification
+        isLiked: r.likes?.includes(user?._id) || false,
         description: r.description,
-        likesCount: r.likes?.length || 0
+        likesCount: r.likes?.length || 0,
+        isOwned: (r.createdBy?._id || r.createdBy) === user?._id,
+        isPublic: r.isPublic,
+        // Map ingredients/steps for Modal
+        ingredients: r.ingredients,
+        steps: r.steps,
+        cookingTime: r.cookingTime,
+        servings: 2, // Default or fetch
+        difficulty: r.difficulty
     }));
 
     return (
         <main className="flex-1 p-8 overflow-y-auto bg-background">
+            <RecipeModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
+
             {/* Header */}
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-10">
                 <div>
@@ -154,8 +221,8 @@ export function DashboardContent({ user }) {
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`pb-3 text-sm font-medium transition-colors relative font-sans whitespace-nowrap ${activeTab === tab
-                                ? "text-primary"
-                                : "text-muted-foreground hover:text-foreground"
+                            ? "text-primary"
+                            : "text-muted-foreground hover:text-foreground"
                             }`}
                     >
                         {tab}
@@ -175,8 +242,10 @@ export function DashboardContent({ user }) {
                         <RecipeCard
                             key={index}
                             recipe={recipe}
-                            onLike={() => { }}
-                            onSave={() => { }}
+                            onClick={() => setSelectedRecipe(recipe)} // Open Modal
+                            onLike={() => handleLike(recipe._id)}
+                            onSave={() => handleSave(recipe._id)}
+                            onShare={() => handleShare(recipe._id)} // Share Handler
                             onEdit={() => { }}
                             onDelete={() => { }}
                         />
@@ -192,7 +261,9 @@ export function DashboardContent({ user }) {
                                 ? "You haven't created any recipes yet."
                                 : activeTab === "Liked"
                                     ? "You haven't liked any recipes yet."
-                                    : "No recipes available in this category."}
+                                    : activeTab === "Saved"
+                                        ? "You haven't saved any recipes yet."
+                                        : "No recipes available."}
                         </p>
                     </div>
                 )}
