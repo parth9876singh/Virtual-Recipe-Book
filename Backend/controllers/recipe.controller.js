@@ -110,12 +110,7 @@ module.exports.getRecipeById = async (req, res) => {
         const recipe = await Recipe.findById(req.params.id).populate("createdBy", "name email");
         if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
-        // If private, only creator can view (simplified logic, usually shared link might work too?)
-        // For now, if public OR it's mine, I can see it. But since this is public endpoint, 
-        // we rely on frontend context or separate auth check middleware if strictly enforcing.
-        // Let's allow fetching by ID generally if they have link, 
-        // OR enforce: if (!recipe.isPublic && (!req.user || req.user._id !== recipe.createdBy)) -> 403
-        // But getRecipeById is currently public. We'll leave it open for now or add check if needed.
+
 
         res.json(recipe);
     } catch (err) {

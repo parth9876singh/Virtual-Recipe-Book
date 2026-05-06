@@ -53,7 +53,7 @@ module.exports.userLogin = async (req, res, next) => {
         const token = user.generateAuthToken();
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // true in production
+            secure: false, 
             sameSite: "lax",
             maxAge: 24 * 60 * 60 * 1000,
         });

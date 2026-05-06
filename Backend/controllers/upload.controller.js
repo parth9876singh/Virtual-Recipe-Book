@@ -47,3 +47,4 @@ module.exports.uploadMultipleImages = async (req, res) => {
         res.status(500).json({ message: "Upload failed", error });
     }
 };
+

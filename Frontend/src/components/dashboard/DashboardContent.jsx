@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import api from "../../lib/axios";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast"; // Import toast
+import { motion, AnimatePresence } from "framer-motion";
 
 export function DashboardContent({ user }) {
     const [recipes, setRecipes] = useState([]);
@@ -27,7 +28,6 @@ export function DashboardContent({ user }) {
                 setRecipes(res.data.recipes);
             } else if (activeTab === "Saved") {
                 const res = await api.get("/recipe/saved-recipes");
-                // Backend returns { message, count, recipes: [...] }
                 setRecipes(res.data.recipes);
             } else if (activeTab === "Liked") {
                 const res = await api.get("/recipe/all");
@@ -45,22 +45,16 @@ export function DashboardContent({ user }) {
     useEffect(() => {
         const fetchStatsData = async () => {
             try {
-                // Get all relevant data parallelly or simpler
-                // Get My Recipes Count
                 const myRes = await api.get("/recipe/my-recipes");
                 const myCount = myRes.data.count;
 
-                // Get Saved Recipes Count
                 const savedRes = await api.get("/recipe/saved-recipes");
                 const savedCount = savedRes.data.count;
 
-                // Get Liked (client side filter from all public for now, or assume 0 if expensive)
-                // Keeping simple to avoid too many calls, just use what we have or user info if we stored it
-                // Let's rely on array filtering if we are in that tab, but initial load:
                 setStats(prev => [
                     { ...prev[0], value: myCount.toString() },
                     { ...prev[1], value: savedCount.toString() },
-                    { ...prev[2], value: "-" } // Placeholder
+                    { ...prev[2], value: "-" }
                 ]);
 
             } catch (e) {
@@ -68,7 +62,7 @@ export function DashboardContent({ user }) {
             }
         };
         if (user?._id) fetchStatsData();
-    }, [user?._id, activeTab]); // Refresh stats on tab change too roughly
+    }, [user?._id, activeTab]);
 
     useEffect(() => {
         fetchTabRecipes();
@@ -81,7 +75,7 @@ export function DashboardContent({ user }) {
             case "My Recipes":
                 return recipes;
             case "Saved":
-                return recipes; // Already fetched specific list
+                return recipes;
             case "Liked":
                 return recipes.filter(r => r.likes?.includes(user?._id));
             default:
@@ -98,7 +92,7 @@ export function DashboardContent({ user }) {
             await api.post(`/recipe/${recipeId}/share`);
             toast.dismiss(loadingToast);
             toast.success("Recipe is now Public!");
-            fetchTabRecipes(); // Refresh list to show change
+            fetchTabRecipes();
         } catch (error) {
             toast.dismiss();
             toast.error("Failed to share.");
@@ -109,7 +103,7 @@ export function DashboardContent({ user }) {
         try {
             await api.post(`/recipe/${recipeId}/save`);
             toast.success("Saved status updated");
-            fetchTabRecipes(); // Refresh (important if in Saved tab to remove it)
+            fetchTabRecipes();
         } catch (error) {
             toast.error("Failed to update save.");
         }
@@ -118,7 +112,6 @@ export function DashboardContent({ user }) {
     const handleLike = async (recipeId) => {
         try {
             await api.post(`/recipe/${recipeId}/like`);
-            // Optimistic update or refresh? Refresh for now
             const updatedRecipes = recipes.map(r => {
                 if (r._id === recipeId) {
                     const isLiked = r.likes.includes(user._id);
@@ -135,56 +128,72 @@ export function DashboardContent({ user }) {
 
 
     const recipesData = filteredRecipes.map(r => ({
-        ...r, // Keep original data for modal
+        ...r,
         _id: r._id,
         name: r.title,
         category: r.cuisine || "General",
         image: r.thumbnail,
-        saved: user?.savedRecipes?.includes(r._id) || activeTab === "Saved", // Logic can be complex if user obj isn't live updated. 
-        // Better: check if ID is in the fetched 'saved' list? 
-        // Simplified: For now we assume false unless we are IN Saved tab, OR we need checks.
-        // Let's pass 'isSaved' if the backend returned it? No.
-        // Assume 'saved' button just calls toggle, visually we might not know unless we fetch user again.
-        // Actually, let's map it based on `activeTab === "Saved"` for the saved icon style.
-        isSaved: activeTab === "Saved", // Temporary simplification
+        saved: user?.savedRecipes?.includes(r._id) || activeTab === "Saved",
+        isSaved: activeTab === "Saved",
         isLiked: r.likes?.includes(user?._id) || false,
         description: r.description,
         likesCount: r.likes?.length || 0,
         isOwned: (r.createdBy?._id || r.createdBy) === user?._id,
         isPublic: r.isPublic,
-        // Map ingredients/steps for Modal
         ingredients: r.ingredients,
         steps: r.steps,
         cookingTime: r.cookingTime,
-        servings: 2, // Default or fetch
+        servings: 2,
         difficulty: r.difficulty
     }));
 
     return (
-        <main className="flex-1 p-8 overflow-y-auto bg-background">
+        <motion.main
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 p-8 overflow-y-auto bg-background/50 relative"
+        >
+            {/* Background blobs for depth */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
             <RecipeModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
 
             {/* Header */}
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-10">
-                <div>
+                <motion.div
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                >
                     <h1 className="text-3xl font-display font-bold text-foreground">
                         Welcome back, {user?.name || "Chef"}!
                     </h1>
                     <p className="text-muted-foreground mt-1 font-sans">
                         Manage your culinary creations
                     </p>
-                </div>
-                <div className="flex gap-3">
+                </motion.div>
+                <motion.div
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex gap-3"
+                >
                     <Link to='/' className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:opacity-90 transition-all font-sans">
                         <HomeIcon className="w-4 h-4" />
                         Home
                     </Link>
 
-                </div>
+                </motion.div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"
+            >
                 {stats.map((stat, index) => (
                     <StatsCard
                         key={index}
@@ -196,26 +205,31 @@ export function DashboardContent({ user }) {
                         itemColor={stat.itemColor}
                     />
                 ))}
-            </div>
+            </motion.div>
 
             {/* Search and Filter */}
-            <div className="flex gap-4 mb-8">
+            <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex gap-4 mb-8"
+            >
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search recipes..."
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-sans placeholder:text-muted-foreground/70"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-sans placeholder:text-muted-foreground/70"
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted transition-colors font-medium text-foreground font-sans">
+                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-colors font-medium text-foreground font-sans">
                     <Filter className="w-4 h-4" />
                     Filter
                 </button>
-            </div>
+            </motion.div>
 
             {/* Tabs */}
-            <div className="flex gap-8 border-b border-border mb-8 overflow-x-auto">
+            <div className="flex gap-8 border-b border-white/10 mb-8 overflow-x-auto">
                 {["My Recipes", "Saved", "Liked"].map((tab) => (
                     <button
                         key={tab}
@@ -227,47 +241,67 @@ export function DashboardContent({ user }) {
                     >
                         {tab}
                         {activeTab === tab && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                            <motion.div
+                                layoutId="activeTab"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                            />
                         )}
                     </button>
                 ))}
             </div>
 
             {/* Recipe Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loading ? (
-                    <p className="text-muted-foreground col-span-full text-center py-10">Loading recipes...</p>
-                ) : recipesData.length > 0 ? (
-                    recipesData.map((recipe, index) => (
-                        <RecipeCard
-                            key={index}
-                            recipe={recipe}
-                            onClick={() => setSelectedRecipe(recipe)} // Open Modal
-                            onLike={() => handleLike(recipe._id)}
-                            onSave={() => handleSave(recipe._id)}
-                            onShare={() => handleShare(recipe._id)} // Share Handler
-                            onEdit={() => { }}
-                            onDelete={() => { }}
-                        />
-                    ))
-                ) : (
-                    <div className="col-span-full text-center py-12">
-                        <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <BookOpen className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-foreground mb-1">No recipes found</h3>
-                        <p className="text-muted-foreground">
-                            {activeTab === "My Recipes"
-                                ? "You haven't created any recipes yet."
-                                : activeTab === "Liked"
-                                    ? "You haven't liked any recipes yet."
-                                    : activeTab === "Saved"
-                                        ? "You haven't saved any recipes yet."
-                                        : "No recipes available."}
-                        </p>
-                    </div>
-                )}
-            </div>
-        </main>
+            <motion.div
+                layout
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+                <AnimatePresence mode="popLayout">
+                    {loading ? (
+                        <p className="text-muted-foreground col-span-full text-center py-10">Loading recipes...</p>
+                    ) : recipesData.length > 0 ? (
+                        recipesData.map((recipe, index) => (
+                            <motion.div
+                                key={recipe._id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <RecipeCard
+                                    recipe={recipe}
+                                    onClick={() => setSelectedRecipe(recipe)} // Open Modal
+                                    onLike={() => handleLike(recipe._id)}
+                                    onSave={() => handleSave(recipe._id)}
+                                    onShare={() => handleShare(recipe._id)} // Share Handler
+                                    onEdit={() => { }}
+                                    onDelete={() => { }}
+                                />
+                            </motion.div>
+                        ))
+                    ) : (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="col-span-full text-center py-12"
+                        >
+                            <div className="w-16 h-16 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
+                                <BookOpen className="w-8 h-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-foreground mb-1">No recipes found</h3>
+                            <p className="text-muted-foreground">
+                                {activeTab === "My Recipes"
+                                    ? "You haven't created any recipes yet."
+                                    : activeTab === "Liked"
+                                        ? "You haven't liked any recipes yet."
+                                        : activeTab === "Saved"
+                                            ? "You haven't saved any recipes yet."
+                                            : "No recipes available."}
+                            </p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+        </motion.main>
     );
 }
